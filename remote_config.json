@@ -1,0 +1,12 @@
+{
+  "conditions": [],
+  "parameters": {
+    "welcome_slogan": {
+      "defaultValue": {
+        "value": "Việc học, việc nhà — gọn gàng mỗi ngày"
+      },
+      "description": "Slogan hiển thị trên màn hình khởi động UTH Todo",
+      "valueType": "STRING"
+    }
+  }
+}

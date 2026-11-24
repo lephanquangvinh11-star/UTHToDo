@@ -1,0 +1,164 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Document ID: {userId} (matches Firebase Auth UID)
+// Fields:
+//   - uid: string (required, immutable, 1..128 chars) - Owner's Firebase Auth UID
+//   - displayName: string (required, 1..100 chars) - User display name
+//   - email: string (optional, 0..254 chars) - User email address (PII, owner-only access)
+//   - isGuest: bool (required) - Whether account is anonymous/guest
+//   - avatarUrl: string (optional, 0..1024 chars) - Optional avatar URL
+//   - updatedAt: int (required, > 0) - Last update epoch timestamp in milliseconds
+//
+// Subcollection: users/{userId}/tasks
+// Document ID: {taskId} (e.g., "task_1")
+// Fields:
+//   - id: int (required, immutable, > 0) - Numeric task ID
+//   - uid: string (required, immutable, 1..128 chars) - Owner's Firebase Auth UID
+//   - title: string (required, 1..200 chars) - Task title
+//   - note: string (required, 0..2000 chars) - Task detailed note
+//   - category: string (required, enum: ['study', 'life']) - Task category
+//   - date: string (required, 0..20 chars, YYYY-MM-DD or empty) - Due date
+//   - time: string (required, 0..10 chars, HH:mm or empty) - Due time
+//   - priority: string (required, enum: ['low', 'medium', 'high']) - Priority level
+//   - remind: bool (required) - Reminder toggle
+//   - done: bool (required) - Completion status
+//   - subtasks: list (required, 0..50 items) - List of subtask maps {title: string, done: bool}
+//   - createdAt: int (required, immutable, > 0) - Creation epoch timestamp in milliseconds
+//   - updatedAt: int (required, > 0) - Update epoch timestamp in milliseconds
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    function uidUnchanged(userId) {
+      return ('uid' in request.resource.data) &&
+        request.resource.data.uid is string &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.uid == userId;
+    }
+
+    function uidNotModified() {
+      return ('uid' in request.resource.data) &&
+        request.resource.data.uid == resource.data.uid;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function validStringLength(field, minLen, maxLen) {
+      return request.resource.data[field] is string &&
+        request.resource.data[field].size() >= minLen &&
+        request.resource.data[field].size() <= maxLen;
+    }
+
+    function isValidOptionalString(field, minLen, maxLen) {
+      return !(field in request.resource.data) ||
+        (request.resource.data[field] is string &&
+         request.resource.data[field].size() >= minLen &&
+         request.resource.data[field].size() <= maxLen);
+    }
+
+    // ===============================================================
+    // Domain Validators (Used in BOTH create and update)
+    // ===============================================================
+
+    function isValidUserProfile(data, userId) {
+      return hasRequiredFields(['uid', 'displayName', 'isGuest', 'updatedAt']) &&
+        hasOnlyAllowedFields(['uid', 'displayName', 'email', 'isGuest', 'avatarUrl', 'updatedAt']) &&
+        uidUnchanged(userId) &&
+        validStringLength('uid', 1, 128) &&
+        validStringLength('displayName', 1, 100) &&
+        isValidOptionalString('email', 0, 254) &&
+        isValidOptionalString('avatarUrl', 0, 1024) &&
+        data.isGuest is bool &&
+        data.updatedAt is int && data.updatedAt > 0;
+    }
+
+    function isValidTask(data, userId) {
+      return hasRequiredFields([
+          'id', 'uid', 'title', 'note', 'category', 'date',
+          'time', 'priority', 'remind', 'done', 'subtasks',
+          'createdAt', 'updatedAt'
+        ]) &&
+        hasOnlyAllowedFields([
+          'id', 'uid', 'title', 'note', 'category', 'date',
+          'time', 'priority', 'remind', 'done', 'subtasks',
+          'createdAt', 'updatedAt'
+        ]) &&
+        uidUnchanged(userId) &&
+        validStringLength('uid', 1, 128) &&
+        data.id is int && data.id > 0 && data.id <= 2147483647 &&
+        validStringLength('title', 1, 200) &&
+        validStringLength('note', 0, 2000) &&
+        data.category is string && data.category in ['study', 'life'] &&
+        validStringLength('date', 0, 20) &&
+        (data.date == '' || data.date.matches('^\\d{4}-\\d{2}-\\d{2}$')) &&
+        validStringLength('time', 0, 10) &&
+        (data.time == '' || data.time.matches('^\\d{2}:\\d{2}$')) &&
+        data.priority is string && data.priority in ['low', 'medium', 'high'] &&
+        data.remind is bool &&
+        data.done is bool &&
+        data.subtasks is list && data.subtasks.size() <= 50 &&
+        data.createdAt is int && data.createdAt > 0 &&
+        data.updatedAt is int && data.updatedAt > 0;
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUserProfile(request.resource.data, userId);
+      allow update: if isOwner(userId) &&
+        isDocOwner() &&
+        uidNotModified() &&
+        isValidUserProfile(request.resource.data, userId);
+      allow delete: if isOwner(userId) && isDocOwner();
+
+      match /tasks/{taskId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidTask(request.resource.data, userId);
+        allow update: if isOwner(userId) &&
+          isDocOwner() &&
+          uidNotModified() &&
+          request.resource.data.id == resource.data.id &&
+          request.resource.data.createdAt == resource.data.createdAt &&
+          isValidTask(request.resource.data, userId);
+        allow delete: if isOwner(userId) && isDocOwner();
+      }
+    }
+
+    // Default deny for all other paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

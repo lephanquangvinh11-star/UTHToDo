@@ -1,0 +1,25 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json",
+    "database": "(default)",
+    "location": "asia-southeast1"
+  },
+  "remoteconfig": {
+    "template": "remote_config.json"
+  },
+  "auth": {
+    "providers": {
+      "anonymous": true,
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "UTH Todo",
+        "supportEmail": "lephanquangvinh11@gmail.com",
+        "authorizedRedirectUris": [
+          "https://uthtodo-27971.firebaseapp.com/__/auth/handler",
+          "http://localhost"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Row 1: Checked circle (cx=38, cy=43, r=8) -->
+    <path
+        android:fillColor="#45FFFFFF"
+        android:pathData="M38,35A8,8 0 1,1 38,51A8,8 0 1,1 38,35Z" />
+
+    <!-- Row 1: Checkmark inside circle -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M34.2,43.0L37.0,45.8L42.2,40.2"
+        android:strokeWidth="2.5"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Row 1: Rounded pill bar (x=51..76, y=39.8..46.2, r=3.2) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54.2,39.8L72.8,39.8A3.2,3.2 0 0,1 76.0,43.0A3.2,3.2 0 0,1 72.8,46.2L54.2,46.2A3.2,3.2 0 0,1 51.0,43.0A3.2,3.2 0 0,1 54.2,39.8Z" />
+
+    <!-- Row 2: Unchecked outline circle (cx=38, cy=65, r=6.8) -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M38,58.2A6.8,6.8 0 1,1 38,71.8A6.8,6.8 0 1,1 38,58.2Z"
+        android:strokeWidth="2.4"
+        android:strokeColor="#CCFFFFFF" />
+
+    <!-- Row 2: Rounded pill bar (x=51..76, y=61.8..68.2, r=3.2) -->
+    <path
+        android:fillColor="#CCFFFFFF"
+        android:pathData="M54.2,61.8L72.8,61.8A3.2,3.2 0 0,1 76.0,65.0A3.2,3.2 0 0,1 72.8,68.2L54.2,68.2A3.2,3.2 0 0,1 51.0,65.0A3.2,3.2 0 0,1 54.2,61.8Z" />
+
+</vector>
