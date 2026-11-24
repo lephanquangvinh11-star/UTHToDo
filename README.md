@@ -48,45 +48,32 @@ Dự án được tổ chức theo kiến trúc phân tầng rõ ràng (`Clean L
 
 ```text
 com.uthtodo.dpgh/
-├── MainActivity.kt                  # Entry point khởi tạo App & nạp AppNavGraph
+├── MainActivity.kt                   # Khởi tạo App, các Manager/Repository & AppNavGraph
 ├── data/
 │   ├── local/
-│   │   ├── AppPreferences.kt        # Lưu cài đặt Giao diện (Sáng/Tối, Màu chủ đạo) & Thông báo
-│   │   └── SessionManager.kt        # Quản lý phiên đăng nhập UserSession
+│   │   ├── AppPreferences.kt         # Cài đặt giao diện, màu chủ đạo & thông báo
+│   │   └── SessionManager.kt         # Quản lý phiên người dùng
 │   ├── model/
-│   │   ├── AppNotification.kt       # Model thông báo & bộ sinh thông báo từ trạng thái công việc
-│   │   ├── OnboardingModel.kt       # Dữ liệu 3 bước Onboarding
-│   │   └── TaskModels.kt            # Model Task, Subtask & bộ chuyển đổi JSON / Firestore Map
+│   │   ├── AppNotification.kt        # Model thông báo
+│   │   ├── OnboardingModel.kt        # Dữ liệu màn hình giới thiệu
+│   │   └── TaskModels.kt             # Model Task, Subtask & chuyển đổi dữ liệu
 │   ├── remote/
-│   │   ├── FirebaseManager.kt       # Tích hợp Firebase Auth, Firestore, Storage, Remote Config, Analytics, Crashlytics
-│   │   └── TaskApiClient.kt         # REST API client dự phòng
+│   │   ├── FirebaseManager.kt        # Tích hợp dịch vụ Firebase
+│   │   └── TaskApiClient.kt          # Client API dữ liệu
 │   └── repository/
-│       └── TaskRepository.kt        # Single Source of Truth đồng bộ Cloud Firestore + Local Cache
+│       └── TaskRepository.kt         # Đồng bộ dữ liệu Cloud Firestore & local cache
 ├── service/
-│   ├── FCMService.kt                # Dịch vụ Firebase Cloud Messaging & BroadcastReceivers
-│   └── ReminderScheduler.kt         # Đặt lịch AlarmManager nhắc việc trước hạn 15 phút
+│   ├── FCMService.kt                 # Xử lý thông báo đẩy FCM & receiver
+│   └── ReminderScheduler.kt          # Lên lịch nhắc việc trước hạn 15 phút
 ├── ui/
-│   ├── components/
-│   │   ├── AppBottomNavigationBar.kt # Thanh điều hướng dưới cùng & nút (+) FAB
-│   │   ├── AppIcons.kt              # Các biểu tượng vector vẽ bằng Compose Canvas
-│   │   └── PrivacyPolicyDialog.kt   # Hộp thoại Điều khoản & Chính sách quyền riêng tư
+│   ├── components/                   # Bottom bar, Canvas icons, hộp thoại chính sách
 │   ├── navigation/
-│   │   └── AppNavGraph.kt           # NavHost quản lý luồng điều hướng toàn ứng dụng
-│   ├── screens/                     # 10 màn hình giao diện Jetpack Compose
-│   │   ├── WelcomeScreen.kt
-│   │   ├── OnboardingScreen.kt
-│   │   ├── LoginScreen.kt
-│   │   ├── HomeScreen.kt
-│   │   ├── TaskListScreen.kt
-│   │   ├── TaskDetailScreen.kt
-│   │   ├── AddEditTaskScreen.kt
-│   │   ├── NotificationScreen.kt
-│   │   ├── SettingsScreen.kt
-│   │   └── ProfileScreen.kt
-│   └── theme/                       # Cấu hình Material 3 Theme, Color, Typography
+│   │   └── AppNavGraph.kt            # Điều hướng toàn ứng dụng
+│   ├── screens/                      # Welcome, Onboarding, Login, Home, TaskList,
+│   │                                   # TaskDetail, AddEditTask, Notification, Settings, Profile
+│   └── theme/                        # Material 3 Theme, Color, Typography
 └── util/
-    └── DateTimeUtils.kt             # Hàm định dạng thời gian tương đối (Hôm nay, Ngày mai, Tuần này)
-```
+    └── DateTimeUtils.kt              # Định dạng ngày giờ tương đối
 
 ---
 
